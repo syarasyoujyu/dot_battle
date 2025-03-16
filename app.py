@@ -7,6 +7,7 @@ import csv
 import pandas as pd
 from supabase import create_client, Client
 import os
+from pydantic import BaseModel
 load_dotenv()
 supabase_client = create_client(os.environ.get("DB_URL"), os.environ.get("DB_PASSWORD"))
 # Initialize OpenAI API
@@ -32,6 +33,9 @@ def get_character_info(character_id):
             break
     return char["image"], f"HP: {char['hp']} / AT: {char['at']}"
 
+class CharacterInfo(BaseModel):
+    at:int
+    hp:int
 def generate_character(description):
     # Generate image using OpenAI
     response = client.images.generate(
@@ -43,8 +47,16 @@ def generate_character(description):
     )
     id = str(uuid4())
     # Generate random HP and AT
-    hp = random.randint(50, 100)
-    at = random.randint(10, 30)
+    info=client.beta.chat.completions.parse(
+        model="gpt-4o-2024-08-06",
+        messages=[
+            {"role": "system", "content": "以下の情報から考えられるキャラのHPとATを教えてください"},
+            {"role": "user", "content": f"{description}"},
+        ],
+        response_format=CharacterInfo,
+    )
+    result=info.choices[0].message.parsed
+    hp,at=result.hp,result.at
     image_url = response.data[0].url
     return id, image_url, image_url, hp, at
 
