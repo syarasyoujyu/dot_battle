@@ -2,10 +2,8 @@ import gradio as gr
 from openai import OpenAI
 import random
 from dotenv import load_dotenv
-from uuid import uuid4
-import csv
-import pandas as pd
-from supabase import create_client, Client
+from uuid import uuid4 
+from supabase import create_client
 import os
 from pydantic import BaseModel
 load_dotenv()
@@ -31,7 +29,7 @@ def get_character_info(character_name):
         if char_pred["name"] == character_name:
             char=char_pred
             break
-    return char["image"], f"HP: {char['hp']} / AT: {char['at']}"
+    return char["image"], f"HP: {char['hp']} / AT: {char['at']}" #type: ignore
 
 class CharacterInfo(BaseModel):
     at:int
@@ -72,10 +70,10 @@ def battle(player_name, enemy_name):
             enemy=char_pred
     
     # 初期HP設定
-    player_hp = player["hp"]
-    enemy_hp = enemy["hp"]
-    player_at = player["at"]
-    enemy_at = enemy["at"]
+    player_hp = player["hp"] #type: ignore
+    enemy_hp = enemy["hp"] #type: ignore
+    player_at = player["at"] #type: ignore
+    enemy_at = enemy["at"] #type: ignore
     
     log = []
     turn = 1
